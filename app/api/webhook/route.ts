@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     clientKey: process.env.MIDTRANS_CLIENT_KEY!,
   });
 
-  let event: Midtrans.WebhookEvent;
+  // let event: midtransClient.WebhookEvent;
 
   try {
     event = snap.webhook.constructEvent(body, signature);
@@ -23,41 +23,41 @@ export async function POST(req: Request) {
     return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
   }
 
-  const transaction = event.transaction_status;
-  const orderId = event.order_id;
+  // const transaction = event.transaction_status;
+  // const orderId = event.order_id;
 
-  if (transaction === "capture") {
-    // Pembayaran berhasil
-    const order = await prismadb.order.update({
-      where: {
-        id: orderId,
-      },
-      data: {
-        isPaid: true,
-        // Tambahkan data lain yang ingin Anda perbarui
-      },
-      include: {
-        orderItems: true,
-      },
-    });
+  // if (transaction === "capture") {
+  //   // Pembayaran berhasil
+  //   const order = await prismadb.order.update({
+  //     where: {
+  //       id: orderId,
+  //     },
+  //     data: {
+  //       isPaid: true,
+  //       // Tambahkan data lain yang ingin Anda perbarui
+  //     },
+  //     include: {
+  //       orderItems: true,
+  //     },
+  //   });
 
-    const productIds = order.orderItems.map((orderItem) => orderItem.productId);
+  // const productIds = order.orderItems.map((orderItem) => orderItem.productId);
 
-    await prismadb.product.updateMany({
-      where: {
-        id: {
-          in: [...productIds],
-        },
-      },
-      data: {
-        isArchived: true,
-      },
-    });
-  } else if (transaction === "cancel" || transaction === "deny") {
-    return new NextResponse(`Pembayaran dibatalkan: ${event.cancel_reason}`, {
-      status: 400,
-    });
-  }
+  //   await prismadb.product.updateMany({
+  //     where: {
+  //       id: {
+  //         in: [...productIds],
+  //       },
+  //     },
+  //     data: {
+  //       isArchived: true,
+  //     },
+  //   });
+  // } else if (transaction === "cancel" || transaction === "deny") {
+  //   return new NextResponse(`Pembayaran dibatalkan: ${event.cancel_reason}`, {
+  //     status: 400,
+  //   });
+  // }
 
   return new NextResponse(null, { status: 200 });
 }
